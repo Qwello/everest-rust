@@ -136,6 +136,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e496a50fda8aacccc86d7529e2c1e0892dbd0f898a6b5645b5561b89c3210efa"
 
 [[package]]
+name = "everest"
+version = "0.1.0"
+dependencies = [
+ "argh",
+ "rumqttc",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "everest_build"
+version = "0.1.0"
+
+[[package]]
 name = "flume"
 version = "0.10.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -453,12 +468,10 @@ name = "rust_kvs"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "argh",
  "async-trait",
+ "everest",
  "rumqttc",
- "serde",
  "serde_json",
- "thiserror",
  "tokio",
 ]
 

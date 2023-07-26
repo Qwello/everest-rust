@@ -1,0 +1,12 @@
+[package]
+name = "rust_kvs"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+everest = { path = "../everest" }
+rumqttc = "0.22.0"
+tokio = { version = "1.29.1", features = ["rt-multi-thread", "macros"] }
+anyhow = "1.0.0"
+async-trait = "0.1.72"
+serde_json = "1.0.103"
