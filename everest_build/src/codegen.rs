@@ -1,31 +1,29 @@
 use crate::schema::interface::{Argument, Command, Type};
 use crate::schema::{manifest::ProvidesEntry, Interface, Manifest};
 use anyhow::{Context, Result};
-use argh::FromArgs;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use serde::Serialize;
 use std::collections::BTreeMap;
 use std::fs;
-use std::io::Write;
 use std::path::PathBuf;
 use titlecase::titlecase;
 
 // TODO(sirver): Using quote && syn here is probably overkill. I would fair better and get nicer
 // code with just using strings.
 
-#[derive(Debug, Serialize)]
-struct ProvidesInterface {
-    interface: String,
-}
-
-fn concat_words(words: &[&str]) -> String {
+fn title_case(words: &[&str]) -> String {
     let mut concatenated = String::new();
     for word in words {
         let capitalized = titlecase(word);
         concatenated.push_str(&capitalized);
     }
     concatenated
+}
+
+#[derive(Debug, Serialize)]
+struct ProvidesInterface {
+    interface: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -67,7 +65,8 @@ fn type_for_argument(arg: &Argument) -> Result<TokenStream> {
         }
         Argument::Multiple(_) => {
             // TODO(sirver): We do not further dig deep, we just accept any serde_json::Value if we
-            // accept more than one. The user of the framework has to sort things out manually.
+            // accept more than one. The user of the framework has to sort things out manually,
+            // i.e. we do not do any validation.
             quote! { ::serde_json::Value }
         }
     };
@@ -76,7 +75,6 @@ fn type_for_argument(arg: &Argument) -> Result<TokenStream> {
 
 fn emit_command(cmd_name: &str, cmd: &Command) -> Result<TokenStream> {
     let cmd_ident = format_ident!("{}", cmd_name);
-
     let mut doc = format!("{}\n\n", cmd.description);
     let mut args = Vec::new();
     for (arg_name, arg) in &cmd.arguments {
@@ -85,7 +83,7 @@ fn emit_command(cmd_name: &str, cmd: &Command) -> Result<TokenStream> {
             arg_name,
             arg.description
                 .as_ref()
-                .map(|s| &s as &str)
+                .map(|s| s as &str)
                 .unwrap_or("not documented")
         ));
         let arg_type = type_for_argument(&arg.arg)?;
@@ -100,7 +98,7 @@ fn emit_command(cmd_name: &str, cmd: &Command) -> Result<TokenStream> {
                 "\nReturns: {}",
                 r.description
                     .as_ref()
-                    .map(|s| &s as &str)
+                    .map(|s| s as &str)
                     .unwrap_or("not documented\n")
             ));
             let arg_type = type_for_argument(&r.arg)?;
@@ -119,12 +117,12 @@ fn emit_interface_service_trait(
     provides_entry: &ProvidesEntry,
     interface: &Interface,
 ) -> Result<TokenStream> {
-    let trait_name = format_ident!("{}", concat_words(&[&provides_entry.interface, "service"]));
+    let trait_name = format_ident!("{}", title_case(&[&provides_entry.interface, "service"]));
 
     let mut cmds = Vec::new();
 
     for (cmd_name, cmd) in &interface.cmds {
-        cmds.push(emit_command(cmd_name, &cmd)?);
+        cmds.push(emit_command(cmd_name, cmd)?);
     }
     let description = &provides_entry.description;
     Ok(quote! {
@@ -139,8 +137,8 @@ fn emit_interface_service_trait(
 /// Returns [ InterfaceService, InterfaceService ]
 fn emit_module_struct_generics_traits(manifest: &Manifest) -> Vec<TokenStream> {
     let mut entries = Vec::new();
-    for (slot_name, provides_entry) in manifest.provides.iter() {
-        let trait_name = format_ident!("{}", concat_words(&[&provides_entry.interface, "service"]));
+    for (_, provides_entry) in manifest.provides.iter() {
+        let trait_name = format_ident!("{}", title_case(&[&provides_entry.interface, "service"]));
         entries.push(quote! { #trait_name });
     }
     entries
@@ -149,8 +147,8 @@ fn emit_module_struct_generics_traits(manifest: &Manifest) -> Vec<TokenStream> {
 /// Returns [ Slot1ServiceImpl, Slot2ServiceImpl ]
 fn emit_module_struct_generics_impls(manifest: &Manifest) -> Vec<TokenStream> {
     let mut entries = Vec::new();
-    for (slot_name, provides_entry) in manifest.provides.iter() {
-        let impl_name = format_ident!("{}", concat_words(&[slot_name, "service", "impl"]));
+    for (slot_name, _) in manifest.provides.iter() {
+        let impl_name = format_ident!("{}", title_case(&[slot_name, "service", "impl"]));
         entries.push(quote! { #impl_name });
     }
     entries
@@ -220,9 +218,9 @@ fn emit_interface_service_glue(
     let module_name = format_ident!("{}_service", slot_name);
     let trait_name = format_ident!(
         "{}",
-        concat_words(&[&manifest.provides[slot_name].interface, "service"])
+        title_case(&[&manifest.provides[slot_name].interface, "service"])
     );
-    let generic_name = format_ident!("{}", concat_words(&[slot_name, "service", "impl"]));
+    let generic_name = format_ident!("{}", title_case(&[slot_name, "service", "impl"]));
     let generics_impl = emit_module_struct_generics_impls(manifest);
 
     let append_cmd_topic = if interface.cmds.is_empty() {
@@ -276,7 +274,7 @@ fn emit_module_struct(module_name: &str, manifest: &Manifest) -> Result<TokenStr
     let generics_impl = emit_module_struct_generics_impls(manifest);
     let mut service_names = Vec::new();
     let mut service_topics = Vec::new();
-    for (slot_name, provides_entry) in manifest.provides.iter() {
+    for (slot_name, _) in manifest.provides.iter() {
         service_names.push(format_ident!("{}_service", slot_name));
         service_topics.push(format_ident!("{}_service_topics", slot_name));
     }
@@ -355,16 +353,28 @@ pub fn emit(module_name: String, manifest_path: PathBuf, everest_core: PathBuf) 
     let manifest: Manifest = serde_yaml::from_str(&blob)?;
 
     let mut tokens: Vec<TokenStream> = Vec::new();
+    // First, we output the METADATA string that we need to publish upon startup.
     tokens.push(emit_metadata(&module_name, &manifest.provides)?);
+
+    // Next, we care for our "provides".
     for (slot_name, provides_entry) in manifest.provides.iter() {
         let p = everest_core.join(format!("interfaces/{}.yaml", provides_entry.interface));
         let blob = fs::read_to_string(&p).with_context(|| format!("Reading {p:?}"))?;
         let interface_yaml: Interface = serde_yaml::from_str(&blob)?;
 
+        // First by emitting the interface trait definitions. The user must implement this trait
+        // for every slot.
+        // TODO(sirver): If two slots have the same interface, this will currently lead to a double
+        // definition of the trait.
         tokens.push(emit_interface_service_trait(
-            &provides_entry,
+            provides_entry,
             &interface_yaml,
         )?);
+
+        // Next we implement the functionality needed for making sure the users code is called.
+        // This generates two functions `generate_topics` to get a list of topics this 'requires'
+        // will want to listen on and `handle_mqtt_message` which turns the JSON blob of a call
+        // into a Rust datatype, calls the users implementation and publishes the result.
         tokens.push(emit_interface_service_glue(
             &manifest,
             slot_name,
@@ -372,6 +382,8 @@ pub fn emit(module_name: String, manifest_path: PathBuf, everest_core: PathBuf) 
         )?);
     }
 
+    // Lastly, we need to define the `Module` struct and its implementation. This is the object the
+    // user needs to instantiate and call `loop_forever` on to drive the Node forward.
     tokens.push(emit_module_struct(&module_name, &manifest)?);
 
     let out = quote! {

@@ -1,13 +1,10 @@
-// NOCOM(#sirver): what
-#![allow(unused)]
 use anyhow::Result;
 
 mod codegen;
 pub mod schema;
 
-use std::fs;
 use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 #[derive(Debug, Default)]
 pub struct Builder {
@@ -45,7 +42,7 @@ impl Builder {
 
         let out = codegen::emit(self.module_name, self.manifest_path, self.everest_core)?;
 
-        let mut f = std::fs::File::create(&path)?;
+        let mut f = std::fs::File::create(path)?;
         f.write_all(out.as_bytes())?;
         Ok(())
     }

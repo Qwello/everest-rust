@@ -117,7 +117,7 @@ impl<'de> Deserialize<'de> for Variable {
             None => None,
             Some(v) => Some(
                 serde_yaml::from_value(v)
-                    .map_err(|e| serde::de::Error::custom("'description' is not a String'"))?,
+                    .map_err(|_| serde::de::Error::custom("'description' is not a String'"))?,
             ),
         };
 
