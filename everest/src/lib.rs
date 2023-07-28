@@ -45,7 +45,7 @@ pub struct ResultData {
 }
 
 #[derive(FromArgs)]
-/// Reach new heights.
+/// An everest Node.
 struct Args {
     /// prefix of installation.
     #[argh(option)]
