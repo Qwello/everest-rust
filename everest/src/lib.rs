@@ -1,7 +1,7 @@
 use argh::FromArgs;
 use rumqttc::{self, AsyncClient, EventLoop, MqttOptions};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::net::SocketAddr;
 use std::path::PathBuf;
 use thiserror::Error;
@@ -33,7 +33,7 @@ pub enum Command {
 pub struct CallData {
     pub id: String,
     pub origin: String,
-    pub args: HashMap<String, serde_json::Value>,
+    pub args: BTreeMap<String, serde_json::Value>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

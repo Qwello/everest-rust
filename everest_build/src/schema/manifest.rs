@@ -1,11 +1,11 @@
 use serde::Deserialize;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Manifest {
     pub description: String,
-    pub provides: HashMap<String, ProvidesEntry>,
+    pub provides: BTreeMap<String, ProvidesEntry>,
     pub metadata: Metadata,
 }
 

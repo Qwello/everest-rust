@@ -1,23 +1,23 @@
 use serde::{Deserialize, Deserializer, Serialize};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct Interface {
-    description: String,
+    pub description: String,
     #[serde(default)]
-    cmds: HashMap<String, Command>,
+    pub cmds: BTreeMap<String, Command>,
     #[serde(default)]
-    vars: HashMap<String, Variable>,
+    pub vars: BTreeMap<String, Variable>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
-struct Command {
-    description: String,
+pub struct Command {
+    pub description: String,
     #[serde(default)]
-    arguments: HashMap<String, Variable>,
-    result: Option<Variable>,
+    pub arguments: BTreeMap<String, Variable>,
+    pub result: Option<Variable>,
 }
 
 #[derive(Debug, Serialize)]
@@ -59,7 +59,7 @@ pub struct ArrayOptions {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct ObjectOptions {
     #[serde(default)]
-    pub properties: HashMap<String, Variable>,
+    pub properties: BTreeMap<String, Variable>,
 
     #[serde(default)]
     pub required: Vec<String>,

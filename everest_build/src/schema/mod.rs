@@ -1,5 +1,5 @@
 use serde::{Deserialize, Deserializer, Serialize};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 pub mod interface;
 pub mod manifest;
@@ -11,5 +11,5 @@ pub use manifest::Manifest;
 #[serde(deny_unknown_fields)]
 pub struct DataTypes {
     pub description: String,
-    pub types: HashMap<String, interface::Variable>,
+    pub types: BTreeMap<String, interface::Variable>,
 }

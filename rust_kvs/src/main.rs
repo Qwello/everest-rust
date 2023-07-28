@@ -1,15 +1,17 @@
 use async_trait::async_trait;
-use generated::RustKvsService;
-use std::collections::HashMap;
+use generated::KvsService;
+use std::collections::BTreeMap;
 
-mod generated;
+mod generated {
+    include!(concat!(env!("OUT_DIR"), "/generated.rs"));
+}
 
 struct Kvs {
-    values: HashMap<String, serde_json::Value>,
+    values: BTreeMap<String, serde_json::Value>,
 }
 
 #[async_trait]
-impl RustKvsService for Kvs {
+impl KvsService for Kvs {
     async fn store(&mut self, key: String, value: serde_json::Value) -> everest::Result<()> {
         self.values.insert(key, value);
         Ok(())
@@ -23,7 +25,7 @@ impl RustKvsService for Kvs {
             .unwrap_or(serde_json::Value::Null))
     }
 
-    async fn remove(&mut self, key: String) -> everest::Result<()> {
+    async fn delete(&mut self, key: String) -> everest::Result<()> {
         self.values.remove(&key);
         Ok(())
     }
@@ -36,7 +38,7 @@ impl RustKvsService for Kvs {
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let kvs = Kvs {
-        values: HashMap::new(),
+        values: BTreeMap::new(),
     };
 
     generated::Module::init(kvs).await?.loop_forever().await?;

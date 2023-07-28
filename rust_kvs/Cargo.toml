@@ -3,6 +3,9 @@ name = "rust_kvs"
 version = "0.1.0"
 edition = "2021"
 
+[build-dependencies]
+everest_build = { path = "../everest_build" }
+
 [dependencies]
 everest = { path = "../everest" }
 rumqttc = "0.22.0"
