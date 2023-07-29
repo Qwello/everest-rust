@@ -1,17 +1,17 @@
 [package]
 name = "everest_build"
-version = "0.1.0"
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license-file.workspace = true
 
 [dependencies]
-anyhow = "1.0.72"
-argh = "0.1.10"
-proc-macro2 = "1.0.66"
-quote = "1.0.32"
-serde = { version = "1.0.175", features = ["derive"] }
-serde_json = "1.0.104"
-serde_yaml = "0.9.25"
-syn = "2.0.27"
-titlecase = "2.2.1"
+anyhow.workspace = true
+argh.workspace = true
+proc-macro2.workspace = true
+quote.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true
+syn.workspace = true
+titlecase.workspace = true

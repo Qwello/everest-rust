@@ -62,11 +62,11 @@ struct Args {
     pub module: String,
 }
 
-// TODO(sirver): A lot of this should probably be in something like "internal".
+// TODO(hrapp): A lot of this should probably be in something like "internal".
 pub fn initialize_mqtt(module: &str) -> (AsyncClient, EventLoop, String) {
     let args: Args = argh::from_env();
 
-    // TODO(sirver): This should probably not be hardcoded, but I have no idea how Everest
+    // TODO(hrapp): This should probably not be hardcoded, but I have no idea how Everest
     // distributes this knowledge.
     let mqtt_socket: SocketAddr = "127.0.0.1:1883".parse().unwrap();
 

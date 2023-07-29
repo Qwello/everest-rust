@@ -9,7 +9,7 @@ use std::path::PathBuf;
 #[derive(Debug, Default)]
 pub struct Builder {
     everest_core: PathBuf,
-    // TODO(sirver): This is almost always the same anyways.
+    // TODO(hrapp): This is almost always the same anyways.
     manifest_path: PathBuf,
     module_name: String,
     out_dir: Option<PathBuf>,

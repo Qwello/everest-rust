@@ -9,7 +9,7 @@ use std::fs;
 use std::path::PathBuf;
 use titlecase::titlecase;
 
-// TODO(sirver): Using quote && syn here is probably overkill. I would fair better and get nicer
+// TODO(hrapp): Using quote && syn here is probably overkill. I would fair better and get nicer
 // code with just using strings.
 
 fn title_case(words: &[&str]) -> String {
@@ -64,7 +64,7 @@ fn type_for_argument(arg: &Argument) -> Result<TokenStream> {
             todo!("not yet implemented: {arg:?}");
         }
         Argument::Multiple(_) => {
-            // TODO(sirver): We do not further dig deep, we just accept any serde_json::Value if we
+            // TODO(hrapp): We do not further dig deep, we just accept any serde_json::Value if we
             // accept more than one. The user of the framework has to sort things out manually,
             // i.e. we do not do any validation.
             quote! { ::serde_json::Value }
@@ -174,7 +174,7 @@ fn emit_command_implementation_glue(
                     .ok_or(everest::Error::MissingArgument(#arg_name))?,
                 )
                 .map_err(|_| everest::Error::InvalidArgument(#arg_name))?;
-            // TODO(sirver): Validation should happen here (pattern, minimum, maximum, minLen and
+            // TODO(hrapp): Validation should happen here (pattern, minimum, maximum, minLen and
             // so on)
         });
         args_call.push(quote! { #arg_ident });
@@ -248,7 +248,7 @@ fn emit_interface_service_glue(
                 module: &mut Module< #( #generics_impl ),* >,
                 payload: &[u8],
             ) -> ::everest::Result<()> {
-                // TODO(sirver): This quietly ignores wrong input.
+                // TODO(hrapp): This quietly ignores wrong input.
                 let Ok(cmd) = ::serde_json::from_slice::<::everest::Command>(payload) else {
                     return Ok(());
                 };
@@ -364,7 +364,7 @@ pub fn emit(module_name: String, manifest_path: PathBuf, everest_core: PathBuf) 
 
         // First by emitting the interface trait definitions. The user must implement this trait
         // for every slot.
-        // TODO(sirver): If two slots have the same interface, this will currently lead to a double
+        // TODO(hrapp): If two slots have the same interface, this will currently lead to a double
         // definition of the trait.
         tokens.push(emit_interface_service_trait(
             provides_entry,
