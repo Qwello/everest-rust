@@ -14,6 +14,19 @@ comes with the following crates:
   [`kvs`](https://github.com/EVerest/everest-core/blob/dfe28df90b38505faa724d980838c1e63d93fff4/interfaces/kvs.yaml)
   interface on the `main` slot.
 
+## Trying it out
+
+If you never worked with Rust, here is a quickstart:
+
+- Install rust as outlined on <https://rustup.rs/>, which should just be this
+  one line: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
+- Clone this repository, cd into `rust_kvs` and edit `build.rs` - adapt the path
+  to `everest-core` there so that the YAMLs are found during codegen.
+- Run `cargo build --release`. The binary will end up in
+  `../target/release/rust_kvs`.
+- Copy this binary and the `manifest.yaml` into a everest
+  `libexec/everest/modules/RustKvs` directory.
+- Change your runtime config to use `RustKvs` instead of `Store`.
 
 ## Goals
 
@@ -37,21 +50,21 @@ Missing are these a least. None of them are hard to implement, I started with
 requires since that seemed the most difficult. They are just not done yet and I
 wanted early feedback before continuing.
 
-    - Integration into EVerests build system
-    - Client codegen, i.e. `requires`.
-    - Support pub/sub of variables.
-    - support for objects and $ref.
-    - testing support that does not require MQTT running.
+- Integration into EVerests build system
+- Client codegen, i.e. `requires`.
+- Support pub/sub of variables.
+- support for objects and $ref.
+- testing support that does not require MQTT running.
 
 ## Open questions
 
 This are things I ran into that I do not understand yet:
 
-    - I saw protobuf mentioned in some documentation, but it (sadly) does not
-      make an appearance. Everything seems to be JSON. Why is protobuf mentioned?
-    - How does a node know which connection it needs to listen to? Is it told by
-      the framework or does it need to parse the configuration yaml (that it
-      gets through `--conf` on the commandline) itself?
-    - Why does every note publish `metadata` with the slots it provides? Is this
-      so the manager can valid that all configured connections in the runtime
-      config are actually also available?
+- I saw protobuf mentioned in some documentation, but it (sadly) does not make
+  an appearance. Everything seems to be JSON. Why is protobuf mentioned?
+- How does a node know which connection it needs to listen to? Is it told by the
+  framework or does it need to parse the configuration yaml (that it gets
+  through `--conf` on the commandline) itself?
+- Why does every note publish `metadata` with the slots it provides? Is this so
+  the manager can valid that all configured connections in the runtime config
+  are actually also available?
